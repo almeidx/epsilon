@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import Client from './struct/client';
+import Client from './structures/client';
 
 const client = new Client();
 

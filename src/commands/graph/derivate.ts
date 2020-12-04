@@ -2,7 +2,7 @@ import { createCanvas } from 'canvas';
 import { Command } from 'discord-akairo';
 import { Message, MessageAttachment, Permissions } from 'discord.js';
 import * as math from 'mathjs';
-import util from '../util/util';
+import util from '../../util/util';
 
 export default class DerivateCommand extends Command {
   public constructor() {
@@ -15,11 +15,16 @@ export default class DerivateCommand extends Command {
           otherwise: 'you need to input the function',
         },
       ],
+      category: 'graph',
       clientPermissions: [Permissions.FLAGS.ATTACH_FILES],
+      cooldown: 1e4,
       description: {
         content: 'Displays a graph for the derivate of the function introduced',
+        examples: ['x ^ 2 + 2x'],
+        usage: '<equation>',
       },
       ratelimit: 2,
+      typing: true,
     });
   }
 

@@ -28,11 +28,6 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.10.tgz#5958a82e41863cfc71f2307b3748e3491ba03785"
   integrity sha512-J32dgx2hw8vXrSbu4ZlVhn1Nm3GbeCFNw2FWL8S5QKucHGY0cyNwjdQdO+KMBZ4wpmC7KhLCiNsdk1RFRIYUQQ==
 
-"@types/p5@^0.9.1":
-  version "0.9.1"
-  resolved "https://registry.yarnpkg.com/@types/p5/-/p5-0.9.1.tgz#920c6cd6ee30b5d9e5cc04cb9b11bb762c333bc5"
-  integrity sha512-4glOKdqdBiRWDFZwi/MjHudPV2U4t2L4fTTSacGapfFxyNXzZcAshAjqmrJkCIZcFlhRBEAL7AM95xRDMfrIwg==
-
 "@types/strip-bom@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/strip-bom/-/strip-bom-3.0.0.tgz#14a8ec3956c2e81edb7520790aecf21c290aebd2"
@@ -706,11 +701,6 @@ node-pre-gyp@^0.11.0:
     rimraf "^2.6.1"
     semver "^5.3.0"
     tar "^4"
-
-node-worker-threads-pool@^1.4.3:
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/node-worker-threads-pool/-/node-worker-threads-pool-1.4.3.tgz#0c809df7f14f1e829e5f20a88357afafa5f30116"
-  integrity sha512-US55ZGzEDQY2oq8Bc33dFVNKGpx4KaCJqThMDomSsUeX8tMdp2eDjQ6OP0yFd1HTEuHuLqxXSTWC4eidEsbXlg==
 
 nopt@^4.0.1:
   version "4.0.3"

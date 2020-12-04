@@ -2,7 +2,7 @@ import { createCanvas } from 'canvas';
 import { Command } from 'discord-akairo';
 import { Message, MessageAttachment, Permissions } from 'discord.js';
 import * as math from 'mathjs';
-import util from '../util/util';
+import util from '../../util/util';
 
 export default class GraphCommand extends Command {
   public constructor() {
@@ -20,11 +20,16 @@ export default class GraphCommand extends Command {
           otherwise: 'you need to input the function',
         }
       ],
+      category: 'graph',
       clientPermissions: [Permissions.FLAGS.ATTACH_FILES],
+      cooldown: 1e4,
       description: {
-        content: 'Displays a graph for the function introduced',
+        content: 'Displays a graph for the expression introduced',
+        examples: ['cos(x)', '--squares tan(x)'],
+        usage: '<equation> [--squares]',
       },
       ratelimit: 2,
+      typing: true,
     });
   }
 

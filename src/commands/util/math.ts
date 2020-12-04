@@ -1,6 +1,7 @@
 import { Command } from 'discord-akairo'
-import { Message, Permissions } from 'discord.js';
+import type { Message } from 'discord.js';
 import * as math from 'mathjs';
+import util from '../../util/util';
 
 export default class MathCommand extends Command {
   public constructor() {
@@ -13,15 +14,18 @@ export default class MathCommand extends Command {
           otherwise: 'you need to input the expression',
         },
       ],
-      clientPermissions: [Permissions.FLAGS.ATTACH_FILES],
+      category: 'util',
+      cooldown: 4e3,
       description: {
-        content: 'Evaluates a math expression',
+        content: 'Evaluates the expression provided',
+        examples: ['sqrt(42) ^ 5', '1 + 2'],
+        usage: '<expression>'
       },
-      ratelimit: 2,
+      ratelimit: 3,
     })
   }
 
   public exec(message: Message, { expr }: { expr: string }) {
-    return message.util?.reply(math.evaluate(expr));
+    return message.util?.send(util.code(math.evaluate(expr)));
   }
 }

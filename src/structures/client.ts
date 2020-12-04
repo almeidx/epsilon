@@ -1,4 +1,4 @@
-import { AkairoClient, CommandHandler, ListenerHandler} from 'discord-akairo';
+import { AkairoClient, CommandHandler, InhibitorHandler, ListenerHandler } from 'discord-akairo';
 import { join } from 'path';
 
 export default class Client extends AkairoClient {
@@ -7,6 +7,7 @@ export default class Client extends AkairoClient {
     allowMention: true,
     commandUtil: true,
     commandUtilLifetime: 3e5,
+    commandUtilSweepInterval: 6e5,
     defaultCooldown: 3e3,
     directory: join(__dirname, '..', 'commands'),
     handleEdits: true,
@@ -17,15 +18,15 @@ export default class Client extends AkairoClient {
     directory: join(__dirname, '..', 'listeners'),
   });
 
-  // public readonly inhibitorHandler: InhibitorHandler = new InhibitorHandler(this, {
-  //   directory: join(__dirname, '..', 'inhibitors'),
-  // });
+  public readonly inhibitorHandler: InhibitorHandler = new InhibitorHandler(this, {
+    directory: join(__dirname, '..', 'inhibitors'),
+  });
 
   public constructor() {
     super({
       ownerID: [
         '385132696135008259',
-        '263073389432930314'
+        '263073389432930314',
       ],
     }, {
       disableMentions: 'everyone',
@@ -46,12 +47,12 @@ export default class Client extends AkairoClient {
 
   private async init(): Promise<void> {
     this.commandHandler.useListenerHandler(this.listenerHandler);
-    // this.commandHandler.useInhibitorHandler(this.inhibitorHandler);
+    this.commandHandler.useInhibitorHandler(this.inhibitorHandler);
 
-    // this.listenerHandler.setEmitters({
-    //   commandHandler: this.commandHandler,
-    //   process,
-    // });
+    this.listenerHandler.setEmitters({
+      commandHandler: this.commandHandler,
+      process,
+    });
 
     this.commandHandler.loadAll();
     this.listenerHandler.loadAll();
