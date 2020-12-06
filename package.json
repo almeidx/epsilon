@@ -23,7 +23,8 @@
     "discord-akairo": "^8.1.0",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
-    "mathjs": "^8.0.1"
+    "mathjs": "^8.0.1",
+    "node-p5": "^1.0.3"
   },
   "devDependencies": {
     "@types/mathjs": "^6.0.8",

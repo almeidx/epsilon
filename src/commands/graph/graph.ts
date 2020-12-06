@@ -1,19 +1,13 @@
-import { createCanvas } from 'canvas';
 import { Command } from 'discord-akairo';
 import { Message, MessageAttachment, Permissions } from 'discord.js';
 import * as math from 'mathjs';
-import util from '../../util/util';
+import p5 from 'node-p5';
 
 export default class GraphCommand extends Command {
   public constructor() {
     super('graph', {
       aliases: ['graph'],
       args: [
-        {
-          flag: ['-s', '--squares'],
-          id: 'squares',
-          match: 'flag',
-        },
         {
           id: 'func',
           match: 'rest',
@@ -29,11 +23,10 @@ export default class GraphCommand extends Command {
         usage: '<equation> [--squares]',
       },
       ratelimit: 2,
-      typing: true,
     });
   }
 
-  public exec(message: Message, { squares, func }: { squares: boolean, func: string }) {
+  public exec(message: Message, { func }: { func: string }) {
     const fn = math.simplify(func);
     const parser = math.parser();
     parser.evaluate("f(x) = " + fn.toString());
@@ -51,43 +44,44 @@ export default class GraphCommand extends Command {
     max = max < 0 ? 0 : max > 100 ? 100 : max
     min = min > 0 ? 0 : min < -100 ? -100 : min
 
-    const canvas = createCanvas(500, 500);
-    const ctx = canvas.getContext('2d');
+    return p5.createSketch(function sketch(p: any) {
+      p.setup = () => {
+        p.createCanvas(500, 500);
+        p.background(255, 0);
+        p.push();
+        p.noFill();
+        p.stroke(255, 200);
+        p.strokeWeight(2);
+        p.line(0, p.map(0, min, max, p.height - 2, 0), p.width, p.map(0, min, max, p.height - 2, 0));
+        p.line(p.map(0, -10, 10, 0, p.height), 0, p.map(0, -10, 10, 0, p.height), p.height);
+        p.pop();
+        p.push();
+        p.noFill();
+        p.stroke(255, 0, 0);
+        p.strokeWeight(2);
+        p.beginShape();
+        let preX = null;
+        let preY = null;
+        for (let x = -10; x < 10; x += 0.001) {
+          const x1 = p.map(x, -10, 10, 0, p.width);
+          const y1 = p.map(res.get(x)!, min, max, p.height, 0);
+          if(preX != null && preY != null){
+            if(p.dist(preX, preY, x1, y1) > 25){
+              p.endShape();
+              p.beginShape()
+            }
+          }
+          p.vertex(x1, y1);
+          preX = x1;
+          preY = y1;
+        }
+        p.endShape();
 
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, util.map(0, min, max, canvas.height - 2, 0), canvas.width, 2);
-    ctx.fillRect(util.map(0, -10, 10, 0, canvas.height), 0, 2, canvas.height);
+        const buffer = p.canvas.toDataURL().split(",")[1]
+        message.util?.send(new MessageAttachment(Buffer.from(buffer, 'base64'), 'derivate.png'));
 
-    if (squares) {
-      ctx.fillStyle = '#FF0000';
-
-      for (let x = -10; x < 10; x += 0.001) {
-        const x1 = util.map(x, -10, 10, 0, canvas.width);
-        const y1 = util.map(res.get(x)!, min, max, canvas.height, 0);
-
-        ctx.fillRect(x1, y1, 2, 2);
+        p.noLoop();
       }
-
-      ctx.fill();
-    } else {
-      ctx.strokeStyle = '#FF0000';
-      ctx.lineWidth = 2;
-
-      ctx.beginPath();
-      let isFirst = true
-      for (let x = -10; x < 10; x += 0.001) {
-        const x1 = util.map(x, -10, 10, 0, canvas.width);
-        const y1 = util.map(res.get(x)!, min, max, canvas.height, 0);
-
-        if (isFirst) {
-          ctx.moveTo(x1, y1);
-          isFirst = false;
-        } else ctx.lineTo(x1, y1);
-      }
-
-      ctx.stroke();
-    }
-
-    return message.util?.send(new MessageAttachment(canvas.toBuffer(), 'graph.png'));
+    });
   }
 }
