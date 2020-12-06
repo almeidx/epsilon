@@ -1,7 +1,7 @@
-import { Command } from 'discord-akairo';
+import { Argument, Command } from 'discord-akairo';
 import { Message, MessageAttachment, Permissions } from 'discord.js';
-import * as math from 'mathjs';
 import p5 from 'node-p5';
+import util from '../../util/util';
 
 export default class GraphCommand extends Command {
   public constructor() {
@@ -9,10 +9,50 @@ export default class GraphCommand extends Command {
       aliases: ['graph'],
       args: [
         {
+          default: 100,
+          flag: ['-z', '-zoom', '--zoom'],
+          id: 'zoom',
+          limit: 1,
+          match: 'option',
+          type: Argument.range('number', 0, 1001),
+        },
+        {
+          default: 2,
+          flag: ['-xs', '-xscale', '--xscale'],
+          id: 'xscale',
+          limit: 1,
+          match: 'option',
+          type: Argument.range('number', 0, 1001),
+        },
+        {
+          default: 2,
+          flag: ['-ys', '-yscale', '--yscale'],
+          id: 'yscale',
+          limit: 1,
+          match: 'option',
+          type: Argument.range('number', 0, 1001),
+        },
+        {
+          default: 0,
+          flag: ['-xc', '-xcenter', '--xcenter'],
+          id: 'xcenter',
+          limit: 1,
+          match: 'option',
+          type: 'number',
+        },
+        {
+          default: 0,
+          flag: ['-yc', '-ycenter', '--ycenter'],
+          id: 'ycenter',
+          limit: 1,
+          match: 'option',
+          type: 'number',
+        },
+        {
           id: 'func',
           match: 'rest',
           otherwise: 'you need to input the function',
-        }
+        },
       ],
       category: 'graph',
       clientPermissions: [Permissions.FLAGS.ATTACH_FILES],
@@ -26,60 +66,40 @@ export default class GraphCommand extends Command {
     });
   }
 
-  public exec(message: Message, { func }: { func: string }) {
-    const fn = math.simplify(func);
-    const parser = math.parser();
-    parser.evaluate("f(x) = " + fn.toString());
-    const res = new Map<number, number>();
-
-    for (let x = -10; x < 10; x += 0.001) {
-      parser.evaluate("x = " + x)
-      const y =  parser.evaluate("f(x)");
-      if (typeof y === 'object') continue;
-      res.set(x, y);
-    }
-
-    let max = Math.max(...res.values());
-    let min = Math.min(...res.values());
-    max = max < 0 ? 0 : max > 100 ? 100 : max
-    min = min > 0 ? 0 : min < -100 ? -100 : min
-
+  public exec(
+    message: Message,
+    {
+      func,
+      xcenter,
+      xscale,
+      ycenter,
+      yscale,
+      zoom,
+    }: {
+      func: string,
+      xcenter: number,
+      xscale: number,
+      ycenter: number,
+      yscale: number,
+      zoom: number,
+    },
+  ) {
     return p5.createSketch(function sketch(p: any) {
+      let parser: math.Parser;
+      try {
+        parser = util.getFunction(func)
+      } catch {
+        return message.util?.reply('there was an error while evaluating your expression');
+      }
       p.setup = () => {
-        p.createCanvas(500, 500);
-        p.background(255, 0);
-        p.push();
-        p.noFill();
-        p.stroke(255, 200);
-        p.strokeWeight(2);
-        p.line(0, p.map(0, min, max, p.height - 2, 0), p.width, p.map(0, min, max, p.height - 2, 0));
-        p.line(p.map(0, -10, 10, 0, p.height), 0, p.map(0, -10, 10, 0, p.height), p.height);
-        p.pop();
-        p.push();
-        p.noFill();
-        p.stroke(255, 0, 0);
-        p.strokeWeight(2);
-        p.beginShape();
-        let preX = null;
-        let preY = null;
-        for (let x = -10; x < 10; x += 0.001) {
-          const x1 = p.map(x, -10, 10, 0, p.width);
-          const y1 = p.map(res.get(x)!, min, max, p.height, 0);
-          if(preX != null && preY != null){
-            if(p.dist(preX, preY, x1, y1) > 25){
-              p.endShape();
-              p.beginShape()
-            }
-          }
-          p.vertex(x1, y1);
-          preX = x1;
-          preY = y1;
+        p.createCanvas(500, 500)
+        try {
+          util.drawGraph(parser, zoom, xscale, yscale, p.createVector(xcenter, ycenter), p)
+        } catch {
+          return message.util?.reply('there was an error while drawing your graph');
         }
-        p.endShape();
-
         const buffer = p.canvas.toDataURL().split(",")[1]
         message.util?.send(new MessageAttachment(Buffer.from(buffer, 'base64'), 'derivate.png'));
-
         p.noLoop();
       }
     });
